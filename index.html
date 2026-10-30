@@ -1,0 +1,375 @@
+﻿<meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Percentage Difference Calculator</title>
+  <style>
+    /* Isolated Styling Wrapper - Prevents WordPress Theme & Header Interference */
+    .pdiff-wrapper * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .pdiff-wrapper {
+      width: 100%;
+      max-width: 850px;
+      margin: 20px auto;
+      padding: 24px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      color: #2c3e50;
+    }
+
+    /* Top Light Background Section */
+    .pdiff-intro {
+      background-color: #f4f7f6;
+      border-left: 4px solid #16a085;
+      padding: 16px 20px;
+      border-radius: 6px;
+      margin-bottom: 25px;
+    }
+
+    .pdiff-intro h2 {
+      font-size: 1.35rem;
+      color: #1a252f;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .pdiff-intro p {
+      font-size: 0.92rem;
+      color: #555555;
+      line-height: 1.45;
+    }
+
+    /* Input Form Layout */
+    .pdiff-form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .pdiff-field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pdiff-field label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #34495e;
+      margin-bottom: 8px;
+    }
+
+    .pdiff-field input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #bdc3c7;
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .pdiff-field input:focus {
+      border-color: #16a085;
+      box-shadow: 0 0 5px rgba(22, 160, 133, 0.2);
+    }
+
+    /* Buttons */
+    .pdiff-btn-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .pdiff-btn {
+      flex: 1;
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .pdiff-btn-submit {
+      background-color: #16a085;
+      color: #ffffff;
+    }
+
+    .pdiff-btn-submit:hover {
+      background-color: #117a65;
+    }
+
+    .pdiff-btn-reset {
+      background-color: #e9ecef;
+      color: #495057;
+    }
+
+    .pdiff-btn-reset:hover {
+      background-color: #dee2e6;
+    }
+
+    /* Result Output Card */
+    .pdiff-result-card {
+      display: none;
+      background-color: #fdfdfd;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .pdiff-result-card.active {
+      display: block;
+    }
+
+    .pdiff-main-result {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #16a085;
+      margin-bottom: 14px;
+    }
+
+    .pdiff-breakdown-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .pdiff-breakdown-list li {
+      font-size: 0.95rem;
+      color: #4a5568;
+      padding: 8px 0;
+      border-bottom: 1px dashed #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .pdiff-breakdown-list li:last-child {
+      border-bottom: none;
+    }
+
+    /* History Table Section */
+    .pdiff-history-section {
+      margin-top: 30px;
+      border-top: 2px solid #f4f7f6;
+      padding-top: 20px;
+    }
+
+    .pdiff-history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .pdiff-history-header h3 {
+      font-size: 1.1rem;
+      color: #2c3e50;
+    }
+
+    .pdiff-clear-btn {
+      background: none;
+      border: none;
+      color: #e74c3c;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .pdiff-clear-btn:hover {
+      text-decoration: underline;
+    }
+
+    .pdiff-history-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .pdiff-history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    .pdiff-history-table th,
+    .pdiff-history-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .pdiff-history-table th {
+      background-color: #f7fafc;
+      color: #718096;
+      font-weight: 600;
+    }
+
+    .pdiff-empty-msg {
+      font-size: 0.9rem;
+      color: #a0aec0;
+      font-style: italic;
+    }
+  </style>
+
+
+
+  <div class="pdiff-wrapper">
+    
+    <!-- Top Light Text Header Block -->
+    <div class="pdiff-intro">
+      <h2>Percentage Difference Calculator</h2>
+      <p>Calculate the percentage difference between two positive numbers where direction (increase or decrease) is not specified.</p>
+    </div>
+
+    <!-- Input Form -->
+    <form id="pdiffForm" onsubmit="event.preventDefault(); calculateDifference();">
+      <div class="pdiff-form-grid">
+        <div class="pdiff-field">
+          <label for="val1">Value 1</label>
+          <input type="number" id="val1" step="any" placeholder="e.g. 100" required="">
+        </div>
+        <div class="pdiff-field">
+          <label for="val2">Value 2</label>
+          <input type="number" id="val2" step="any" placeholder="e.g. 125" required="">
+        </div>
+      </div>
+
+      <div class="pdiff-btn-group">
+        <button type="submit" class="pdiff-btn pdiff-btn-submit">Calculate Difference</button>
+        <button type="button" class="pdiff-btn pdiff-btn-reset" onclick="resetCalculator()">Reset</button>
+      </div>
+    </form>
+
+    <!-- Calculation Results Breakdown -->
+    <div id="resultCard" class="pdiff-result-card">
+      <div id="mainResult" class="pdiff-main-result">Percentage Difference: 0%</div>
+      <ul class="pdiff-breakdown-list">
+        <li><span>Value 1:</span> <strong id="resVal1">0</strong></li>
+        <li><span>Value 2:</span> <strong id="resVal2">0</strong></li>
+        <li><span>Absolute Difference (|V1 - V2|):</span> <strong id="resAbsDiff">0</strong></li>
+        <li><span>Average Value ((V1 + V2) ÷ 2):</span> <strong id="resAvg">0</strong></li>
+        <li><span>Formula Used:</span> <span>[|V1 - V2| ÷ ((V1 + V2) ÷ 2)] × 100</span></li>
+      </ul>
+    </div>
+
+    <!-- History Section -->
+    <div class="pdiff-history-section">
+      <div class="pdiff-history-header">
+        <h3>Calculation History</h3>
+        <button class="pdiff-clear-btn" onclick="clearHistory()">Clear History</button>
+      </div>
+      <div class="pdiff-history-table-wrapper">
+        <table class="pdiff-history-table">
+          <thead>
+            <tr>
+              <th>Value 1</th>
+              <th>Value 2</th>
+              <th>Abs. Difference</th>
+              <th>Average</th>
+              <th>Percentage Difference</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr>
+              <td colspan="5" class="pdiff-empty-msg">No history records yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let diffHistory = [];
+
+    function calculateDifference() {
+      const v1 = parseFloat(document.getElementById('val1').value);
+      const v2 = parseFloat(document.getElementById('val2').value);
+
+      if (isNaN(v1) || isNaN(v2)) {
+        alert("Please enter valid numbers in both fields.");
+        return;
+      }
+
+      if (v1 + v2 === 0) {
+        alert("Sum of Value 1 and Value 2 cannot be zero.");
+        return;
+      }
+
+      // Calculations according to Standard Percentage Difference Formula
+      const absDiff = Math.abs(v1 - v2);
+      const average = (v1 + v2) / 2;
+      const pctDifference = (absDiff / average) * 100;
+
+      // Formatting numbers
+      const formatNum = (num) => Number.isInteger(num) ? num : parseFloat(num.toFixed(4));
+      
+      const pctFormatted = formatNum(pctDifference);
+      const absFormatted = formatNum(absDiff);
+      const avgFormatted = formatNum(average);
+
+      // Display Results
+      const resultCard = document.getElementById('resultCard');
+      const mainResult = document.getElementById('mainResult');
+      
+      resultCard.classList.add('active');
+      mainResult.textContent = `Percentage Difference: ${pctFormatted}%`;
+
+      document.getElementById('resVal1').textContent = v1;
+      document.getElementById('resVal2').textContent = v2;
+      document.getElementById('resAbsDiff').textContent = absFormatted;
+      document.getElementById('resAvg').textContent = avgFormatted;
+
+      // Add record to history
+      addToHistory(v1, v2, absFormatted, avgFormatted, pctFormatted);
+    }
+
+    function addToHistory(v1, v2, absDiff, avg, pct) {
+      const record = { v1, v2, absDiff, avg, pct };
+      diffHistory.unshift(record); // Add to the top of list
+
+      if (diffHistory.length > 10) {
+        diffHistory.pop(); // Maintain maximum 10 history items
+      }
+
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const tbody = document.getElementById('historyBody');
+      
+      if (diffHistory.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="pdiff-empty-msg">No history records yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = '';
+      diffHistory.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.v1}</td>
+          <td>${item.v2}</td>
+          <td>${item.absDiff}</td>
+          <td>${item.avg}</td>
+          <td><strong>${item.pct}%</strong></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function clearHistory() {
+      diffHistory = [];
+      renderHistory();
+    }
+
+    function resetCalculator() {
+      document.getElementById('pdiffForm').reset();
+      document.getElementById('resultCard').classList.remove('active');
+    }
+  </script><p>Powered by <a href="https://freecalctools.net/" target="_blank">Free Calc Tools</a></p>
